@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Calucator - آلة حاسبة احترافية</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Cairo',sans-serif;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:radial-gradient(circle at top,#2563eb,#0f172a 60%);
+  padding:15px;
+  overflow-y:auto;
+}
+
+body::before{
+  content:"";
+  position:absolute;
+  width:450px;
+  height:450px;
+  background:#3b82f6;
+  filter:blur(180px);
+  opacity:.25;
+  border-radius:50%;
+  top:-150px;
+  right:-150px;
+}
+
+body::after{
+  content:"";
+  position:absolute;
+  width:400px;
+  height:400px;
+  background:#06b6d4;
+  filter:blur(180px);
+  opacity:.2;
+  border-radius:50%;
+  bottom:-150px;
+  left:-150px;
+}
+
+.calculator{
+  position:relative;
+  z-index:2;
+  width:100%;
+  max-width:420px;
+  padding:20px;
+  border-radius:30px;
+  background:rgba(17,24,39,.75);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 0 30px rgba(0,0,0,.4);
+  max-height:95vh;
+  overflow-y:auto;
+}
+
+h2{
+  color:white;
+  text-align:center;
+  margin-bottom:15px;
+}
+
+.top-bar{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+select{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:12px;
+  background:#1e293b;
+  color:white;
+}
+
+.screen{
+  width:100%;
+  height:80px;
+  border:none;
+  border-radius:18px;
+  background:#0f172a;
+  color:white;
+  font-size:2rem;
+  padding:10px;
+  margin-bottom:15px;
+  text-align:left;
+}
+
+.buttons{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+button{
+  height:60px;
+  border:none;
+  border-radius:14px;
+  font-size:1.2rem;
+  color:white;
+  background:#1e293b;
+}
+
+button:active{transform:scale(.96);}
+
+.operator{background:#f97316;}
+.equal{background:#10b981;grid-column:span 2;}
+.clear{background:#ef4444;}
+.zero{grid-column:span 2;}
+
+.currency-box{
+  margin-top:20px;
+  padding:15px;
+  border-radius:18px;
+  background:#0f172a;
+}
+
+.currency-box input{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.result{
+  text-align:center;
+  margin-top:10px;
+  color:#22c55e;
+  font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="calculator">
+
+<h2 id="title">آلة حاسبة احترافية</h2>
+
+<div class="top-bar">
+<select id="language" onchange="changeLanguage()">
+  <option value="ar">العربية</option>
+  <option value="en">English</option>
+  <option value="es">Español</option>
+</select>
+</div>
+
+<input id="screen" class="screen" disabled>
+
+<div class="buttons">
+
+<button class="clear" onclick="appendValue('C')">C</button>
+<button onclick="appendValue('%')">%</button>
+<button onclick="appendValue('/')">÷</button>
+<button onclick="appendValue('*')">×</button>
+
+<button onclick="appendValue('7')">7</button>
+<button onclick="appendValue('8')">8</button>
+<button onclick="appendValue('9')">9</button>
+<button onclick="appendValue('-')">-</button>
+
+<button onclick="appendValue('4')">4</button>
+<button onclick="appendValue('5')">5</button>
+<button onclick="appendValue('6')">6</button>
+<button onclick="appendValue('+')">+</button>
+
+<button onclick="appendValue('1')">1</button>
+<button onclick="appendValue('2')">2</button>
+<button onclick="appendValue('3')">3</button>
+<button onclick="appendValue('.')">.</button>
+
+<button class="zero" onclick="appendValue('0')">0</button>
+<button class="equal" onclick="calculate()">=</button>
+
+</div>
+
+<div class="currency-box">
+
+<h3 id="currencyTitle">تحويل العملات</h3>
+
+<input type="number" id="amount" placeholder="أدخل المبلغ">
+
+<div class="top-bar">
+
+<select id="from">
+<option value="1">USD</option>
+<option value="1460">IQD</option>
+<option value="0.91">EUR 🇪🇸</option>
+<option value="3.75">SAR</option>
+<option value="3.67">AED</option>
+<option value="0.38">KWD</option>
+<option value="0.71">JOD</option>
+<option value="31">EGP</option>
+<option value="10.5">MAD</option>
+</select>
+
+<select id="to">
+<option value="1460">IQD</option>
+<option value="1">USD</option>
+<option value="0.91">EUR 🇪🇸</option>
+<option value="3.75">SAR</option>
+<option value="3.67">AED</option>
+<option value="0.38">KWD</option>
+<option value="0.71">JOD</option>
+<option value="31">EGP</option>
+<option value="10.5">MAD</option>
+</select>
+
+</div>
+
+<button onclick="convertCurrency()" style="width:100%;background:#10b981;padding:12px;border-radius:12px;color:white;">
+تحويل
+</button>
+
+<div class="result" id="currencyResult"></div>
+
+</div>
+
+</div>
+
+<script>
+
+/* 🔊 صوت الكيبورد */
+const clickSound = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
+clickSound.volume = 0.4;
+
+/* اللغة */
+let lang="ar";
+
+const text={
+ar:{title:"آلة حاسبة احترافية",currency:"تحويل العملات"},
+en:{title:"Professional Calculator",currency:"Currency Converter"},
+es:{title:"Calculadora Profesional",currency:"Conversor de Monedas"}
+};
+
+/* أرقام */
+function toArabicNumbers(str){
+return str.replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+}
+
+function toEnglishNumbers(str){
+return str.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
+}
+
+function appendValue(v){
+
+clickSound.currentTime=0;
+clickSound.play();
+
+let screen=document.getElementById("screen");
+
+if(v==="C"){
+screen.value="";
+return;
+}
+
+let current=toEnglishNumbers(screen.value);
+current+=v;
+
+if(lang==="ar"){
+screen.value=toArabicNumbers(current);
+}else{
+screen.value=current;
+}
+
+}
+
+function calculate(){
+try{
+let expr=toEnglishNumbers(document.getElementById("screen").value);
+let res=eval(expr);
+
+document.getElementById("screen").value=
+lang==="ar"?toArabicNumbers(res.toString()):res;
+
+}catch{
+document.getElementById("screen").value="Error";
+}
+}
+
+function changeLanguage(){
+
+lang=document.getElementById("language").value;
+
+document.getElementById("title").innerText=text[lang].title;
+document.getElementById("currencyTitle").innerText=text[lang].currency;
+
+}
+
+function convertCurrency(){
+let a=document.getElementById("amount").value;
+let f=document.getElementById("from").value;
+let t=document.getElementById("to").value;
+
+document.getElementById("currencyResult").innerText=
+((a/f)*t).toFixed(2);
+}
+
+</script>
+
+</body>
+</html>
