@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-site-verification" content="Af4AJA8CiZhEaCXobxgb2DQSz1vVlE2qqPC7za6lW08" />
-<title>Calucator - آلة حاسبة احترافية</title>
+<title>Calucator - آلة حاسبة </title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
@@ -16,6 +16,7 @@
   padding:0;
   box-sizing:border-box;
   font-family:'Cairo',sans-serif;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 
 body{
@@ -26,6 +27,11 @@ body{
   background:radial-gradient(circle at top,#2563eb,#0f172a 60%);
   padding:15px;
   overflow-y:auto;
+  position: relative;
+}
+
+body.light-mode {
+  background: radial-gradient(circle at top, #93c5fd, #f1f5f9 60%);
 }
 
 body::before{
@@ -39,6 +45,7 @@ body::before{
   border-radius:50%;
   top:-150px;
   right:-150px;
+  z-index: 1;
 }
 
 body::after{
@@ -52,6 +59,7 @@ body::after{
   border-radius:50%;
   bottom:-150px;
   left:-150px;
+  z-index: 1;
 }
 
 .calculator{
@@ -69,11 +77,18 @@ body::after{
   overflow-y:auto;
 }
 
+body.light-mode .calculator {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+}
+
 h2{
   color:white;
   text-align:center;
   margin-bottom:15px;
 }
+body.light-mode h2 { color: #1e293b; }
 
 .top-bar{
   display:flex;
@@ -89,6 +104,37 @@ select{
   background:#1e293b;
   color:white;
 }
+body.light-mode select {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.theme-btn {
+  background: #1e293b;
+  color: white;
+  border: none;
+  padding: 0 15px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+body.light-mode .theme-btn {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.theme-btn span {
+  display: inline-block;
+  transition: transform 0.5s ease;
+}
+
+.spin {
+  transform: rotate(360deg);
+}
 
 .screen{
   width:100%;
@@ -101,6 +147,11 @@ select{
   padding:10px;
   margin-bottom:15px;
   text-align:left;
+}
+body.light-mode .screen {
+  background: #f8fafc;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
 }
 
 .buttons{
@@ -116,20 +167,35 @@ button{
   font-size:1.2rem;
   color:white;
   background:#1e293b;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+body.light-mode button {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 button:active{transform:scale(.96);}
 
 .operator{background:#f97316;}
-.equal{background:#10b981;grid-column:span 2;}
-.clear{background:#ef4444;}
+.equal{background:#10b981;grid-column:span 2; color: white !important;}
+.clear{background:#ef4444; color: white !important;}
 .zero{grid-column:span 2;}
 
-.currency-box{
+.currency-box, .history-box{
   margin-top:20px;
   padding:15px;
   border-radius:18px;
   background:#0f172a;
+}
+body.light-mode .currency-box, body.light-mode .history-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+}
+
+body.light-mode .currency-box h3, body.light-mode .history-box h3 {
+  color: #1e293b;
 }
 
 .currency-box input{
@@ -138,6 +204,13 @@ button:active{transform:scale(.96);}
   border:none;
   border-radius:10px;
   margin-bottom:10px;
+  background: #1e293b;
+  color: white;
+}
+body.light-mode .currency-box input {
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
 }
 
 .result{
@@ -145,6 +218,26 @@ button:active{transform:scale(.96);}
   margin-top:10px;
   color:#22c55e;
   font-weight:bold;
+}
+
+.history-list {
+  max-height: 120px;
+  overflow-y: auto;
+  margin-top: 10px;
+  list-style: none;
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  text-align: right;
+}
+body.light-mode .history-list {
+  color: #475569;
+}
+.history-item {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+body.light-mode .history-item {
+  border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
 </style>
@@ -162,6 +255,7 @@ button:active{transform:scale(.96);}
   <option value="en">English</option>
   <option value="es">Español</option>
 </select>
+<button class="theme-btn" id="themeToggle" onclick="toggleTheme()"><span id="themeIcon">🌙</span></button>
 </div>
 
 <input id="screen" class="screen" disabled>
@@ -169,19 +263,19 @@ button:active{transform:scale(.96);}
 <div class="buttons">
 
 <button class="clear" onclick="appendValue('C')">C</button>
-<button onclick="appendValue('%')">%</button>
-<button onclick="appendValue('/')">÷</button>
-<button onclick="appendValue('*')">×</button>
+<button class="operator" onclick="appendValue('%')">%</button>
+<button class="operator" onclick="appendValue('/')">÷</button>
+<button class="operator" onclick="appendValue('*')">×</button>
 
 <button onclick="appendValue('7')">7</button>
 <button onclick="appendValue('8')">8</button>
 <button onclick="appendValue('9')">9</button>
-<button onclick="appendValue('-')">-</button>
+<button class="operator" onclick="appendValue('-')">-</button>
 
 <button onclick="appendValue('4')">4</button>
-<button onclick="appendValue('5')">5</button>
+<button onclick="appendValue('5') text-align:center;">5</button>
 <button onclick="appendValue('6')">6</button>
-<button onclick="appendValue('+')">+</button>
+<button class="operator" onclick="appendValue('+')">+</button>
 
 <button onclick="appendValue('1')">1</button>
 <button onclick="appendValue('2')">2</button>
@@ -194,13 +288,9 @@ button:active{transform:scale(.96);}
 </div>
 
 <div class="currency-box">
-
-<h3 id="currencyTitle">تحويل العملات</h3>
-
+<h3 id="currencyTitle" style="color: white; margin-bottom: 10px;">تحويل العملات</h3>
 <input type="number" id="amount" placeholder="أدخل المبلغ">
-
 <div class="top-bar">
-
 <select id="from">
 <option value="1">USD</option>
 <option value="1460">IQD</option>
@@ -212,7 +302,6 @@ button:active{transform:scale(.96);}
 <option value="31">EGP</option>
 <option value="10.5">MAD</option>
 </select>
-
 <select id="to">
 <option value="1460">IQD</option>
 <option value="1">USD</option>
@@ -224,35 +313,34 @@ button:active{transform:scale(.96);}
 <option value="31">EGP</option>
 <option value="10.5">MAD</option>
 </select>
-
+</div>
+<button onclick="convertCurrency()" style="width:100%;background:#10b981;padding:12px;border-radius:12px;color:white;">تحويل</button>
+<div class="result" id="currencyResult"></div>
 </div>
 
-<button onclick="convertCurrency()" style="width:100%;background:#10b981;padding:12px;border-radius:12px;color:white;">
-تحويل
-</button>
-
-<div class="result" id="currencyResult"></div>
-
+<div class="history-box">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h3 id="historyTitle" style="color: white;">سجل العمليات</h3>
+    <button onclick="clearHistory()" style="height: auto; padding: 4px 10px; font-size: 0.85rem; background: #ef4444; color: white !important; border-radius: 8px;">مسح</button>
+  </div>
+  <ul class="history-list" id="historyList"></ul>
 </div>
 
 </div>
 
 <script>
 
-/* 🔊 صوت الكيبورد */
 const clickSound = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
 clickSound.volume = 0.4;
 
-/* اللغة */
 let lang="ar";
 
 const text={
-ar:{title:"آلة حاسبة احترافية",currency:"تحويل العملات"},
-en:{title:"Professional Calculator",currency:"Currency Converter"},
-es:{title:"Calculadora Profesional",currency:"Conversor de Monedas"}
+ar:{title:"آلة حاسبة احترافية",currency:"تحويل العملات",history:"سجل العمليات"},
+en:{title:"Professional Calculator",currency:"Currency Converter",history:"History"},
+es:{title:"Calculadora Profesional",currency:"Conversor de Monedas",history:"Historial"}
 };
 
-/* أرقام */
 function toArabicNumbers(str){
 return str.replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 }
@@ -262,7 +350,6 @@ return str.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
 }
 
 function appendValue(v){
-
 clickSound.currentTime=0;
 clickSound.play();
 
@@ -281,16 +368,18 @@ screen.value=toArabicNumbers(current);
 }else{
 screen.value=current;
 }
-
 }
 
 function calculate(){
 try{
-let expr=toEnglishNumbers(document.getElementById("screen").value);
+let originalExpr = document.getElementById("screen").value;
+let expr=toEnglishNumbers(originalExpr);
 let res=eval(expr);
+let finalResult = lang==="ar"?toArabicNumbers(res.toString()):res;
 
-document.getElementById("screen").value=
-lang==="ar"?toArabicNumbers(res.toString()):res;
+document.getElementById("screen").value= finalResult;
+
+addHistoryItem(originalExpr + " = " + finalResult);
 
 }catch{
 document.getElementById("screen").value="Error";
@@ -298,21 +387,85 @@ document.getElementById("screen").value="Error";
 }
 
 function changeLanguage(){
-
 lang=document.getElementById("language").value;
-
 document.getElementById("title").innerText=text[lang].title;
 document.getElementById("currencyTitle").innerText=text[lang].currency;
-
+document.getElementById("historyTitle").innerText=text[lang].history;
 }
 
 function convertCurrency(){
 let a=document.getElementById("amount").value;
 let f=document.getElementById("from").value;
 let t=document.getElementById("to").value;
+document.getElementById("currencyResult").innerText=((a/f)*t).toFixed(2);
+}
 
-document.getElementById("currencyResult").innerText=
-((a/f)*t).toFixed(2);
+function toggleTheme() {
+  const body = document.body;
+  const icon = document.getElementById("themeIcon");
+
+  icon.classList.add("spin");
+  setTimeout(() => { icon.classList.remove("spin"); }, 500);
+
+  body.classList.toggle("light-mode");
+
+  if(body.classList.contains("light-mode")) {
+    icon.innerText = "☀️";
+    localStorage.setItem("theme", "light");
+  } else {
+    icon.innerText = "🌙";
+    localStorage.setItem("theme", "dark");
+  }
+}
+
+function addHistoryItem(text) {
+  const list = document.getElementById("historyList");
+  const li = document.createElement("li");
+  li.className = "history-item";
+  li.innerText = text;
+  list.insertBefore(li, list.firstChild);
+
+  // حفظ في ذاكرة المتصفح
+  saveHistoryToStorage();
+}
+
+function clearHistory() {
+  document.getElementById("historyList").innerHTML = "";
+  localStorage.removeItem("calcHistory");
+}
+
+function saveHistoryToStorage() {
+  const items = [];
+  document.querySelectorAll(".history-item").forEach(li => items.push(li.innerText));
+  localStorage.setItem("calcHistory", JSON.stringify(items));
+}
+
+function loadHistoryFromStorage() {
+  const saved = localStorage.getItem("calcHistory");
+  if(saved) {
+    const items = JSON.parse(saved);
+    const list = document.getElementById("historyList");
+    // ندرجها بالترتيب العكسي لتعود لشكلها الصحيح
+    items.reverse().forEach(text => {
+      const li = document.createElement("li");
+      li.className = "history-item";
+      li.innerText = text;
+      list.insertBefore(li, list.firstChild);
+    });
+  }
+}
+
+window.onload = function() {
+  loadHistoryFromStorage();
+
+  // فحص النظام أو الذاكرة لتحديد الثيم
+  const savedTheme = localStorage.getItem("theme");
+  const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+
+  if(savedTheme === "light" || (!savedTheme && prefersLight)) {
+    document.body.classList.add("light-mode");
+    document.getElementById("themeIcon").innerText = "☀️";
+  }
 }
 
 </script>
